@@ -8,26 +8,8 @@ Dự án Bài tập lớn Cơ sở Dữ liệu - **Quản lý Ký Túc Xá Sinh 
 ## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy
 
 ### 1. Chuẩn bị Cơ sở Dữ liệu MySQL
-- Mở MySQL (MySQL Workbench, Navicat, phpMyAdmin hoặc CLI) và import toàn bộ file `CSDL_QL_KTX.sql`.
-- Mở file `config/settings.py` (dòng 60-69) để điều chỉnh `USER` và `PASSWORD` cho phù hợp với MySQL của máy bạn nếu cần.
-
 ### 2. Kích hoạt Virtual Environment & Cài thư viện
-Mở Terminal / PowerShell tại thư mục gốc `QL_KTX`:
-```powershell
-# Kích hoạt venv
-.\venv\Scripts\Activate.ps1
-
-# (Nếu dùng máy khác chưa có thư viện thì cài đặt)
-pip install -r requirements.txt
-```
-
 ### 3. Khởi chạy Django Server
-```powershell
-python manage.py runserver
-```
-Truy cập hệ thống tại: **http://127.0.0.1:8000/**
-
----
 
 ## 📁 Cấu Trúc Thư Mục Dự Án
 
