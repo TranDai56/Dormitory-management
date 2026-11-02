@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Xếp phòng cho sinh viên - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Xếp phòng
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 800px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-success">
+                <i class="fa-solid fa-bed me-2"></i>Phân Phòng / Xếp Phòng Ở Cho Sinh Viên
+            </h5>
+            <small class="text-muted">Kiểm tra ràng buộc: Phòng không được vượt quá số người tối đa & Sinh viên chỉ ở 1 phòng tại 1 thời điểm</small>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Chọn Sinh Viên <span class="text-danger">*</span></label>
+                        <select name="masv" class="form-select" required>
+                            <option value="">-- Chọn sinh viên --</option>
+                            {% for sv in ds_sinh_vien %}
+                            <option value="{{ sv.masv }}" {% if request.GET.sv == sv.masv or post.masv == sv.masv %}selected{% endif %}>
+                                {{ sv.masv }} - {{ sv.hoten }} ({{ sv.lop|default:"-" }})
+                                {% with phong=sv.phong_hien_tai %}
+                                    {% if phong %} [Đang ở P.{{ phong.sophong }}]{% endif %}
+                                {% endwith %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Chọn Phòng Ở <span class="text-danger">*</span></label>
+                        <select name="sophong" class="form-select" required>
+                            <option value="">-- Chọn phòng --</option>
+                            {% for p in ds_phong %}
+                            <option value="{{ p.sophong }}" 
+                                    {% if request.GET.phong == p.sophong or post.sophong == p.sophong %}selected{% endif %}
+                                    {% if p.da_day %}disabled style="color: #ef4444;"{% endif %}>
+                                Phòng {{ p.sophong }} ({{ p.loaiphong }}) - Hiện tại: {{ p.so_nguoi_hien_tai }}/{{ p.songuoitoida }} người
+                                {% if p.da_day %}[ĐÃ ĐẦY]{% else %}[Trống {{ p.con_trong }} chỗ]{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Các phòng đã đầy sẽ tự động bị vô hiệu hóa</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày bắt đầu ở <span class="text-danger">*</span></label>
+                        <input type="date" name="ngaybatdau" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+                        <small class="text-muted">Tính tiền phòng chẵn tháng từ tháng bắt đầu</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border small mt-4 mb-0">
+                    <i class="fa-solid fa-circle-info me-2 text-primary"></i>
+                    <strong>Lưu ý nghiệp vụ:</strong> Nếu sinh viên đã có phòng đang ở, hệ thống sẽ tự động cập nhật ngày kết thúc của phòng cũ để chuyển người sang phòng mới.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_phong' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-success fw-semibold">
+                        <i class="fa-solid fa-check me-1"></i> Xác nhận xếp phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

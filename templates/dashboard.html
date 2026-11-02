@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}Bảng điều khiển - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-chart-pie me-1 text-primary"></i> Bảng điều khiển tổng quan
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Welcome Banner & Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-sm overflow-hidden border-0" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h3 class="fw-bold mb-1">Hệ Thống Quản Lý Ký Túc Xá Sinh Viên</h3>
+                            <p class="mb-3 text-white-50">Hệ thống theo dõi phòng ở, dịch vụ, gửi xe tháng và quản lý chi phí KTX theo mô hình CSDL chuẩn hóa.</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'them_sinh_vien' %}" class="btn btn-light btn-sm fw-semibold">
+                                    <i class="fa-solid fa-user-plus text-primary me-1"></i> Thêm sinh viên
+                                </a>
+                                <a href="{% url 'xep_phong' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                                    <i class="fa-solid fa-bed me-1"></i> Xếp phòng ở
+                                </a>
+                                <a href="{% url 'them_su_dung_dich_vu' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                                    <i class="fa-solid fa-cart-plus me-1"></i> Dùng dịch vụ
+                                </a>
+                                <a href="{% url 'dang_ky_xe' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                                    <i class="fa-solid fa-motorcycle me-1"></i> Đăng ký xe tháng
+                                </a>
+                                <a href="{% url 'ghi_nhan_luot_tham' %}" class="btn btn-outline-light btn-sm fw-semibold">
+                                    <i class="fa-solid fa-id-card-clip me-1"></i> Đăng ký khách thăm
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-end d-none d-lg-block">
+                            <i class="fa-solid fa-hotel" style="font-size: 6rem; opacity: 0.18;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-medium">Tổng số sinh viên</span>
+                        <div class="badge bg-primary-subtle text-primary rounded-circle p-2">
+                            <i class="fa-solid fa-user-graduate fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ tong_sinh_vien }}</h3>
+                    <div class="small text-muted">
+                        <span class="text-success fw-semibold"><i class="fa-solid fa-check-circle me-1"></i>{{ so_sv_dang_o }}</span> đang nội trú KTX
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-medium">Phòng ở & Sức chứa</span>
+                        <div class="badge bg-success-subtle text-success rounded-circle p-2">
+                            <i class="fa-solid fa-door-open fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ so_sv_dang_o }} / {{ tong_cho_o }}</h3>
+                    <div class="progress mb-2" style="height: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ ti_le_lap_day }}%;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Lấp đầy: <strong>{{ ti_le_lap_day }}%</strong></span>
+                        <span>Trống: <strong>{{ cho_con_trong }} chỗ</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-medium">Xe vé tháng</span>
+                        <div class="badge bg-warning-subtle text-warning rounded-circle p-2">
+                            <i class="fa-solid fa-motorcycle fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ tong_xe_thang }}</h3>
+                    <div class="small text-muted">
+                        <span>Tối đa 2 xe/SV có hiệu lực</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small fw-medium">Doanh thu dự kiến T{{ current_month }}/{{ current_year }}</span>
+                        <div class="badge bg-info-subtle text-info rounded-circle p-2">
+                            <i class="fa-solid fa-sack-dollar fs-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-1 text-primary">{{ tong_doanh_thu_thang|floatformat:0 }} đ</h3>
+                    <div class="small text-muted">
+                        <span>Bao gồm tiền phòng & mọi DV</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Activity Tables -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Doanh thu theo danh mục -->
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-chart-column me-2 text-primary"></i>Phân bổ doanh thu KTX tháng {{ current_month }}/{{ current_year }}
+                    </h6>
+                    <a href="{% url 'bao_cao' %}?tab=truyvan4" class="btn btn-sm btn-link text-decoration-none">Xem chi tiết</a>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Status Breakdown -->
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-pie-chart me-2 text-success"></i>Tình trạng chỗ ở KTX
+                    </h6>
+                    <a href="{% url 'danh_sach_phong' %}" class="btn btn-sm btn-link text-decoration-none">Sơ đồ phòng</a>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <div style="max-width: 240px; width: 100%;">
+                        <canvas id="occupancyChart"></canvas>
+                    </div>
+                    <div class="d-flex gap-4 mt-3 small">
+                        <div><i class="fa-solid fa-circle text-primary me-1"></i>Đang ở: <strong>{{ so_sv_dang_o }}</strong></div>
+                        <div><i class="fa-solid fa-circle text-success me-1"></i>Còn trống: <strong>{{ cho_con_trong }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logs Row -->
+    <div class="row g-4">
+        <!-- Recent Visitors -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-id-card-clip me-2 text-info"></i>Khách đến thăm mới nhất
+                    </h6>
+                    <a href="{% url 'danh_sach_khach' %}" class="btn btn-sm btn-link text-decoration-none">Tất cả</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for lt in luot_tham_moi %}
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="small">{{ lt.khach.hoten }}</strong>
+                                <span class="badge bg-light text-muted">{{ lt.thoigianden|date:"d/m H:i" }}</span>
+                            </div>
+                            <small class="text-muted d-block">
+                                Đến thăm: <strong>{{ lt.sinh_vien.hoten }}</strong> ({{ lt.sinh_vien.masv }})
+                            </small>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-center text-muted small">Chưa có lượt khách thăm nào.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Parking Logs -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-motorcycle me-2 text-warning"></i>Nhật ký gửi xe gần đây
+                    </h6>
+                    <a href="{% url 'danh_sach_luot_gui' %}" class="btn btn-sm btn-link text-decoration-none">Tất cả</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for lg in luot_xe_moi %}
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">{{ lg.xe_thang_id }}</span>
+                                {% if lg.sotienphatsinh > 0 %}
+                                    <span class="badge badge-subtle-danger">+{{ lg.sotienphatsinh|floatformat:0 }}đ</span>
+                                {% else %}
+                                    <span class="badge badge-subtle-success">Miễn phí</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                SV: {{ lg.xe_thang.sinh_vien.hoten }} | Ngày: {{ lg.ngay|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-center text-muted small">Chưa có lượt gửi xe nào.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Service Usages -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-receipt me-2 text-success"></i>Sử dụng dịch vụ gần đây
+                    </h6>
+                    <a href="{% url 'danh_sach_chi_phi' %}" class="btn btn-sm btn-link text-decoration-none">Tất cả</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for sd in dich_vu_moi %}
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="small">{{ sd.dich_vu.tendichvu }}</strong>
+                                <span class="badge badge-subtle-primary">{{ sd.thanh_tien|floatformat:0 }}đ</span>
+                            </div>
+                            <small class="text-muted d-block">
+                                {{ sd.sinh_vien.hoten }} (SL: {{ sd.soluong }}) - {{ sd.thoigiansudung|date:"d/m H:i" }}
+                            </small>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-center text-muted small">Chưa có bản ghi dịch vụ nào.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Biểu đồ phân bổ doanh thu
+    const ctxRev = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctxRev, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_dv_labels|safe }},
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: {{ chart_dv_data|safe }},
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('vi-VN') + ' đ';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ lấp đầy chỗ ở
+    const ctxOcc = document.getElementById('occupancyChart').getContext('2d');
+    new Chart(ctxOcc, {
+        type: 'doughnut',
+        data: {
+            labels: ['Đang ở', 'Còn trống'],
+            datasets: [{
+                data: [{{ so_sv_dang_o }}, {{ cho_con_trong }}],
+                backgroundColor: ['#2563eb', '#10b981'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false }
+            },
+            cutout: '70%'
+        }
+    });
+</script>
+{% endblock %}

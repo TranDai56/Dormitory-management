@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết Phòng {{ phong.sophong }} - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Phòng {{ phong.sophong }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0 text-primary">Phòng {{ phong.sophong }}</h4>
+            <span class="text-muted small">{{ phong.loaiphong }}</span>
+        </div>
+        <div class="d-flex gap-2">
+            {% if not da_day %}
+            <a href="{% url 'xep_phong' %}?phong={{ phong.sophong }}" class="btn btn-success btn-sm">
+                <i class="fa-solid fa-bed me-1"></i> Xếp sinh viên vào
+            </a>
+            {% endif %}
+            <a href="{% url 'sua_phong' phong.sophong %}" class="btn btn-outline-warning btn-sm">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Sửa
+            </a>
+            <a href="{% url 'xoa_phong' phong.sophong %}" class="btn btn-outline-danger btn-sm">
+                <i class="fa-solid fa-trash me-1"></i> Xóa
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Room Specifications Card -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-circle-info me-2 text-primary"></i>Thông tin phòng ở
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        <div class="display-6 fw-bold text-primary">{{ so_nguoi_hien_tai }} / {{ phong.songuoitoida }}</div>
+                        <small class="text-muted">Sinh viên đang ở / Sức chứa tối đa</small>
+                        <div class="progress mt-2" style="height: 10px;">
+                            <div class="progress-bar {% if da_day %}bg-danger{% else %}bg-success{% endif %}" 
+                                 style="width: {{ phong.ti_le_lap_day }}%;"></div>
+                        </div>
+                    </div>
+
+                    <table class="table table-borderless table-sm mb-0">
+                        <tr>
+                            <td class="text-muted">Loại phòng:</td>
+                            <td class="fw-semibold">{{ phong.loaiphong }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Đơn giá tháng:</td>
+                            <td class="fw-bold text-danger">{{ phong.dongia|floatformat:0 }} đ / người</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Chỗ còn trống:</td>
+                            <td>
+                                {% if da_day %}
+                                    <span class="badge badge-subtle-danger">ĐÃ ĐẦY</span>
+                                {% else %}
+                                    <span class="badge badge-subtle-success">{{ con_trong }} chỗ trống</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Occupants and History -->
+        <div class="col-lg-8">
+            <!-- Current Occupants -->
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold text-success">
+                        <i class="fa-solid fa-users me-2"></i>Danh sách sinh viên đang ở ({{ sv_dang_o|length }})
+                    </h6>
+                    {% if not da_day %}
+                    <a href="{% url 'xep_phong' %}?phong={{ phong.sophong }}" class="btn btn-sm btn-outline-success">
+                        + Thêm người
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mã SV</th>
+                                <th>Họ và tên</th>
+                                <th>Lớp</th>
+                                <th>Ngày bắt đầu ở</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dk in sv_dang_o %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'chi_tiet_sinh_vien' dk.sinh_vien.masv %}" class="badge bg-primary text-decoration-none font-monospace fs-6">
+                                        {{ dk.sinh_vien.masv }}
+                                    </a>
+                                </td>
+                                <td><strong>{{ dk.sinh_vien.hoten }}</strong></td>
+                                <td>{{ dk.sinh_vien.lop|default:"-" }}</td>
+                                <td>{{ dk.ngaybatdau|date:"d/m/Y" }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'tra_phong' dk.madangkyo %}" class="btn btn-outline-danger btn-sm" title="Hoàn tất trả phòng">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Trả phòng
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    Phòng hiện đang trống, chưa có sinh viên nào cư trú.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Past Occupants History -->
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-semibold text-muted">
+                        <i class="fa-solid fa-history me-2"></i>Lịch sử sinh viên từng ở phòng này
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Mã SV</th>
+                                <th>Họ và tên</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dk in lich_su_o %}
+                            <tr>
+                                <td><span class="badge bg-secondary font-monospace">{{ dk.sinh_vien.masv }}</span></td>
+                                <td>{{ dk.sinh_vien.hoten }}</td>
+                                <td>{{ dk.ngaybatdau|date:"d/m/Y" }}</td>
+                                <td>{{ dk.ngayketthuc|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">Chưa có lịch sử trả phòng trước đây.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm dịch vụ mới - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_dich_vu' %}" class="text-decoration-none text-secondary">Dịch vụ</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Thêm mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+                <i class="fa-solid fa-bell-concierge me-2"></i>Thêm Dịch Vụ Mới
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mã dịch vụ <span class="text-danger">*</span></label>
+                    <input type="text" name="madichvu" class="form-control" required placeholder="VD: DV04, GIAT_UI, XE_THUE..." value="{{ post.madichvu }}">
+                    <small class="text-muted">Mã định danh duy nhất của dịch vụ</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên dịch vụ <span class="text-danger">*</span></label>
+                    <input type="text" name="tendichvu" class="form-control" required placeholder="VD: Giặt là sấy khô, Nước bình 20L..." value="{{ post.tendichvu }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Đơn giá (VNĐ) <span class="text-danger">*</span></label>
+                    <input type="number" name="dongia" class="form-control" required placeholder="VD: 25000" value="{{ post.dongia }}" min="0" step="1000">
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_dich_vu' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Lưu dịch vụ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

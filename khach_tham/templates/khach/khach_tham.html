@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý khách thăm - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-id-card-clip me-1 text-primary"></i> Quản lý khách thăm KTX
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row g-4">
+        <!-- Visitors Directory -->
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0 fw-semibold text-primary">
+                            <i class="fa-solid fa-users me-2"></i>Danh mục khách đến KTX ({{ tong_khach }})
+                        </h6>
+                    </div>
+                    <a href="{% url 'them_khach' %}" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm khách
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Mã khách</th>
+                                    <th>Họ và tên</th>
+                                    <th>Số CMT</th>
+                                    <th>Ngày sinh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for k in ds_khach %}
+                                <tr>
+                                    <td><span class="badge bg-secondary font-monospace">{{ k.makhach }}</span></td>
+                                    <td><strong>{{ k.hoten }}</strong></td>
+                                    <td class="font-monospace text-muted">{{ k.socmt }}</td>
+                                    <td>{{ k.ngaysinh|date:"d/m/Y"|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">Chưa có khách nào được đăng ký.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visit Logs -->
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0 fw-semibold text-success">
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i>Nhật ký các lượt đến thăm ({{ tong_luot }})
+                        </h6>
+                    </div>
+                    <a href="{% url 'ghi_nhan_luot_tham' %}" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i> Ghi nhận lượt thăm
+                    </a>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Khách đến thăm</th>
+                                    <th>Sinh viên được thăm</th>
+                                    <th>Thời gian đến</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lt in ds_luot_tham %}
+                                <tr>
+                                    <td><span class="badge bg-light text-muted font-monospace">#{{ lt.maluottham }}</span></td>
+                                    <td>
+                                        <strong>{{ lt.khach.hoten }}</strong>
+                                        <small class="text-muted d-block font-monospace">{{ lt.khach.socmt }}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">{{ lt.sinh_vien.hoten }}</strong>
+                                        <small class="text-muted d-block font-monospace">{{ lt.sinh_vien.masv }}</small>
+                                    </td>
+                                    <td>
+                                        <i class="fa-solid fa-clock text-muted me-1"></i>{{ lt.thoigianden|date:"d/m/Y H:i" }}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'xoa_luot_tham' lt.maluottham %}" class="btn btn-outline-danger btn-sm" title="Xóa bản ghi">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">Chưa có lượt khách thăm nào.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

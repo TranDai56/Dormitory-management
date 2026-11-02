@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm phòng ở mới - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Thêm mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 700px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+                <i class="fa-solid fa-door-open me-2"></i>Thêm Phòng Ở Mới
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="sophong" class="form-control" required placeholder="VD: 103, 202, 301..." value="{{ post.sophong }}">
+                        <small class="text-muted">Mã phòng định danh (Khóa chính)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Loại phòng</label>
+                        <input type="text" name="loaiphong" class="form-control" placeholder="VD: Phòng 2 người, Phòng 4 người..." value="{{ post.loaiphong }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đơn giá thuê (VNĐ/tháng) <span class="text-danger">*</span></label>
+                        <input type="number" name="dongia" class="form-control" required placeholder="VD: 1500000" value="{{ post.dongia|default:1500000 }}" min="0" step="10000">
+                        <small class="text-muted">Tính chẵn tháng cho mỗi sinh viên</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số người tối đa (Sức chứa) <span class="text-danger">*</span></label>
+                        <input type="number" name="songuoitoida" class="form-control" required placeholder="VD: 2, 4, 6, 8" value="{{ post.songuoitoida|default:2 }}" min="1" max="20">
+                        <small class="text-muted">Giới hạn kiểm tra ràng buộc xếp phòng</small>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_phong' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Lưu phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

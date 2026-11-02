@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Sửa Phòng {{ phong.sophong }} - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Sửa: Phòng {{ phong.sophong }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 700px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-warning-emphasis">
+                <i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Thông Tin Phòng Ở
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số phòng</label>
+                        <input type="text" class="form-control bg-light font-monospace" value="{{ phong.sophong }}" readonly disabled>
+                        <small class="text-muted">Khóa chính (Không thể đổi)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Loại phòng</label>
+                        <input type="text" name="loaiphong" class="form-control" value="{{ phong.loaiphong }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đơn giá (VNĐ/tháng)</label>
+                        <input type="number" name="dongia" class="form-control" required value="{{ phong.dongia }}" min="0" step="10000">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số người tối đa</label>
+                        <input type="number" name="songuoitoida" class="form-control" required value="{{ phong.songuoitoida }}" min="1">
+                        <small class="text-muted">Hiện tại đang có {{ phong.so_nguoi_hien_tai }} người ở</small>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'chi_tiet_phong' phong.sophong %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-warning fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

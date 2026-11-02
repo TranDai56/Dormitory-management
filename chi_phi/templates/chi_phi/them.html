@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Ghi nhận dùng dịch vụ - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_chi_phi' %}" class="text-decoration-none text-secondary">Sử dụng dịch vụ</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Ghi nhận mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 700px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+                <i class="fa-solid fa-cart-plus me-2"></i>Ghi Nhận Sinh Viên Sử Dụng Dịch Vụ
+            </h5>
+            <small class="text-muted">Chi phí sẽ tự động được cộng dồn vào hóa đơn thanh toán cuối tháng của sinh viên</small>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Sinh viên sử dụng <span class="text-danger">*</span></label>
+                        <select name="masv" class="form-select" required>
+                            <option value="">-- Chọn sinh viên --</option>
+                            {% for sv in all_sv %}
+                            <option value="{{ sv.masv }}">
+                                {{ sv.masv }} - {{ sv.hoten }} ({{ sv.lop|default:"-" }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Dịch vụ sử dụng <span class="text-danger">*</span></label>
+                        <select name="madv" class="form-select" id="selectDichVu" required>
+                            <option value="">-- Chọn dịch vụ --</option>
+                            {% for dv in all_dv %}
+                            <option value="{{ dv.madichvu }}" data-dongia="{{ dv.dongia }}">
+                                {{ dv.tendichvu }} ({{ dv.dongia|floatformat:0 }} đ)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số lượng <span class="text-danger">*</span></label>
+                        <input type="number" name="soluong" id="inputSoLuong" class="form-control" value="1" min="1" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Thời gian sử dụng</label>
+                        <input type="datetime-local" name="thoigiansudung" class="form-control" value="{{ now_str }}">
+                    </div>
+
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded-3 text-end">
+                            <span class="text-muted me-2">Tạm tính thành tiền:</span>
+                            <span class="fs-5 fw-bold text-primary" id="previewThanhTien">0 đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_chi_phi' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Ghi nhận sử dụng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function updateThanhTien() {
+        const select = document.getElementById('selectDichVu');
+        const selected = select.options[select.selectedIndex];
+        const dongia = parseInt(selected.getAttribute('data-dongia') || 0);
+        const soluong = parseInt(document.getElementById('inputSoLuong').value || 1);
+        const total = dongia * soluong;
+        document.getElementById('previewThanhTien').innerText = total.toLocaleString('vi-VN') + ' đ';
+    }
+    document.getElementById('selectDichVu').addEventListener('change', updateThanhTien);
+    document.getElementById('inputSoLuong').addEventListener('input', updateThanhTien);
+</script>
+{% endblock %}

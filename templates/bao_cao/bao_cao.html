@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+
+{% block title %}Báo cáo & Truy vấn - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-file-invoice-dollar me-1 text-primary"></i> Báo cáo thống kê & Truy vấn dữ liệu
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">Báo Cáo & Truy Vấn Chuyên Sâu</h4>
+            <p class="text-muted small mb-0">Hệ thống thực hiện đầy đủ 4 yêu cầu truy vấn nghiệp vụ của đề bài Project 2</p>
+        </div>
+        <div class="no-print">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-print me-1"></i> In báo cáo
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 shadow-sm border no-print" id="queryTabs">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'truyvan1' %}active{% endif %}" href="?tab=truyvan1">
+                <i class="fa-solid fa-receipt me-1"></i> Truy vấn 1: Chi phí SV theo tháng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'truyvan2' %}active{% endif %}" href="?tab=truyvan2">
+                <i class="fa-solid fa-calendar-days me-1"></i> Truy vấn 2: Sử dụng DV theo kỳ
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'truyvan3' %}active{% endif %}" href="?tab=truyvan3">
+                <i class="fa-solid fa-people-arrows me-1"></i> Truy vấn 3: Khách thăm theo tuần/tháng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'truyvan4' %}active{% endif %}" href="?tab=truyvan4">
+                <i class="fa-solid fa-chart-line me-1"></i> Truy vấn 4: Doanh thu dịch vụ
+            </a>
+        </li>
+    </ul>
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: TRUY VẤN 1 - CHI PHÍ SINH VIÊN THEO THÁNG -->
+    <!-- ======================================================== -->
+    {% if active_tab == 'truyvan1' %}
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-primary mb-1">
+                        <i class="fa-solid fa-file-invoice me-2"></i>Truy vấn 1: Bảng kê chi phí sinh viên theo tháng
+                    </h5>
+                    <small class="text-muted">
+                        Bao gồm tiền phòng (tính chẵn tháng) + Vé xe tháng + Lượt xe phát sinh (lượt 3+) + Dịch vụ sử dụng
+                    </small>
+                </div>
+                <!-- Filter Form -->
+                <form method="GET" class="d-flex flex-wrap align-items-center gap-2 no-print">
+                    <input type="hidden" name="tab" value="truyvan1">
+                    <div class="input-group input-group-sm" style="width: 140px;">
+                        <span class="input-group-text">Tháng</span>
+                        <select name="t1_month" class="form-select">
+                            {% for m in month_choices %}
+                            <option value="{{ m }}" {% if t1_month == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 130px;">
+                        <span class="input-group-text">Năm</span>
+                        <input type="number" name="t1_year" class="form-control" value="{{ t1_year }}" min="2020" max="2030">
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 180px;">
+                        <input type="text" name="t1_masv" class="form-control" placeholder="Lọc theo Mã SV..." value="{{ t1_masv }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-filter me-1"></i> Xem
+                    </button>
+                    {% if t1_masv %}
+                    <a href="?tab=truyvan1&t1_month={{ t1_month }}&t1_year={{ t1_year }}" class="btn btn-outline-secondary btn-sm">Xóa lọc</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã SV</th>
+                            <th>Họ và tên</th>
+                            <th>Lớp</th>
+                            <th>Phòng ở</th>
+                            <th class="text-end">Tiền phòng</th>
+                            <th class="text-end">Xe tháng</th>
+                            <th class="text-end">Xe phát sinh</th>
+                            <th class="text-end">Dịch vụ</th>
+                            <th class="text-end text-primary">TỔNG TIỀN</th>
+                            <th class="text-center no-print">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ds_chi_phi_sv %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge bg-secondary font-monospace">{{ row.sinh_vien.masv }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ row.sinh_vien.hoten }}</strong>
+                                <small class="text-muted d-block font-monospace">CMT: {{ row.sinh_vien.socmt }}</small>
+                            </td>
+                            <td>{{ row.sinh_vien.lop|default:"-" }}</td>
+                            <td>
+                                {% if row.phong %}
+                                    <span class="badge badge-subtle-primary">Phòng {{ row.phong.sophong }}</span>
+                                {% else %}
+                                    <span class="badge bg-light text-muted">Chưa xếp</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">{{ row.tien_phong|floatformat:0 }} đ</td>
+                            <td class="text-end">
+                                {{ row.tien_xe_thang|floatformat:0 }} đ
+                                {% if row.ds_xe %}
+                                <small class="d-block text-muted">({{ row.ds_xe|length }} xe)</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if row.tien_xe_phat_sinh > 0 %}
+                                    <span class="text-danger fw-semibold">+{{ row.tien_xe_phat_sinh|floatformat:0 }} đ</span>
+                                {% else %}
+                                    <span class="text-muted">0 đ</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {{ row.tien_dich_vu|floatformat:0 }} đ
+                                {% if row.ds_su_dung_dv %}
+                                <small class="d-block text-muted">({{ row.ds_su_dung_dv|length }} lượt)</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold fs-6 text-primary">{{ row.tong_tien|floatformat:0 }} đ</span>
+                            </td>
+                            <td class="text-center no-print">
+                                <a href="{% url 'in_hoa_don' row.sinh_vien.masv %}?month={{ t1_month }}&year={{ t1_year }}" 
+                                   target="_blank" class="btn btn-sm btn-outline-primary" title="In phiếu thu / Hóa đơn cá nhân">
+                                    <i class="fa-solid fa-print me-1"></i> In hóa đơn
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                                Không tìm thấy dữ liệu chi phí cho tháng {{ t1_month }}/{{ t1_year }}.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if ds_chi_phi_sv %}
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="9" class="text-end text-uppercase">Tổng cộng chi phí sinh viên tháng {{ t1_month }}/{{ t1_year }}:</td>
+                            <td class="text-end text-danger fs-6">{{ tong_chi_phi_tat_ca|floatformat:0 }} đ</td>
+                            <td class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: TRUY VẤN 2 - SỬ DỤNG DỊCH VỤ THEO KHOẢNG THỜI GIAN -->
+    <!-- ======================================================== -->
+    {% if active_tab == 'truyvan2' %}
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-success mb-1">
+                        <i class="fa-solid fa-calendar-check me-2"></i>Truy vấn 2: Thống kê sinh viên sử dụng dịch vụ theo kỳ
+                    </h5>
+                    <small class="text-muted">
+                        Liệt kê sinh viên cùng tên dịch vụ, tổng giá mỗi dịch vụ sử dụng từ ngày bắt đầu đến ngày kết thúc
+                    </small>
+                </div>
+                <!-- Filter Form -->
+                <form method="GET" class="d-flex flex-wrap align-items-center gap-2 no-print">
+                    <input type="hidden" name="tab" value="truyvan2">
+                    <div class="input-group input-group-sm" style="width: 170px;">
+                        <span class="input-group-text">Từ ngày</span>
+                        <input type="date" name="t2_tu_ngay" class="form-control" value="{{ t2_tu_ngay|date:'Y-m-d' }}">
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 170px;">
+                        <span class="input-group-text">Đến ngày</span>
+                        <input type="date" name="t2_den_ngay" class="form-control" value="{{ t2_den_ngay|date:'Y-m-d' }}">
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 170px;">
+                        <input type="text" name="t2_masv" class="form-control" placeholder="Mã SV..." value="{{ t2_masv }}">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fa-solid fa-filter me-1"></i> Thống kê
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã SV</th>
+                            <th>Họ và tên</th>
+                            <th>Lớp</th>
+                            <th>Dịch vụ sử dụng</th>
+                            <th class="text-end">Đơn giá</th>
+                            <th class="text-center">Tổng số lượng</th>
+                            <th class="text-end text-success">TỔNG GIÁ DỊCH VỤ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ds_su_dung_dv %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><span class="badge bg-secondary font-monospace">{{ row.sinh_vien.masv }}</span></td>
+                            <td><strong>{{ row.sinh_vien.hoten }}</strong></td>
+                            <td>{{ row.sinh_vien.lop|default:"-" }}</td>
+                            <td>
+                                <span class="fw-semibold text-primary">{{ row.dich_vu.tendichvu }}</span>
+                                <small class="text-muted d-block">Mã DV: {{ row.dich_vu.madichvu }}</small>
+                            </td>
+                            <td class="text-end">{{ row.dich_vu.dongia|floatformat:0 }} đ</td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark fs-6">{{ row.tong_so_luong }}</span>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success fs-6">{{ row.tong_tien|floatformat:0 }} đ</strong>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                                Không có lượt sử dụng dịch vụ nào trong khoảng thời gian từ {{ t2_tu_ngay|date:"d/m/Y" }} đến {{ t2_den_ngay|date:"d/m/Y" }}.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if ds_su_dung_dv %}
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="7" class="text-end text-uppercase">Tổng giá trị dịch vụ trong kỳ:</td>
+                            <td class="text-end text-success fs-6">{{ tong_tien_su_dung_dv|floatformat:0 }} đ</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: TRUY VẤN 3 - KHÁCH THĂM THEO TUẦN HOẶC THÁNG -->
+    <!-- ======================================================== -->
+    {% if active_tab == 'truyvan3' %}
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-info mb-1">
+                        <i class="fa-solid fa-users me-2"></i>Truy vấn 3: Thống kê khách thăm sinh viên theo tuần / tháng
+                    </h5>
+                    <small class="text-muted">
+                        Liệt kê sinh viên cùng thông tin khách đến thăm trong tuần hoặc tháng, cùng số lần mỗi khách đến chơi
+                    </small>
+                </div>
+                <!-- Filter Form -->
+                <form method="GET" class="d-flex flex-wrap align-items-center gap-2 no-print">
+                    <input type="hidden" name="tab" value="truyvan3">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="t3_che_do" id="cd_thang" value="thang" {% if t3_che_do == 'thang' %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="btn btn-outline-secondary" for="cd_thang">Theo Tháng</label>
+                        <input type="radio" class="btn-check" name="t3_che_do" id="cd_tuan" value="tuan" {% if t3_che_do == 'tuan' %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="btn btn-outline-secondary" for="cd_tuan">Theo Tuần</label>
+                    </div>
+
+                    {% if t3_che_do == 'tuan' %}
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <span class="input-group-text">Chọn ngày</span>
+                        <input type="date" name="t3_ngay" class="form-control" value="{{ t3_tu_ngay|date:'Y-m-d' }}">
+                    </div>
+                    {% else %}
+                    <div class="input-group input-group-sm" style="width: 140px;">
+                        <span class="input-group-text">Tháng</span>
+                        <select name="t3_month" class="form-select">
+                            {% for m in month_choices %}
+                            <option value="{{ m }}" {% if t3_tu_ngay.month == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 130px;">
+                        <span class="input-group-text">Năm</span>
+                        <input type="number" name="t3_year" class="form-control" value="{{ t3_tu_ngay.year }}" min="2020" max="2030">
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-info text-white btn-sm">
+                        <i class="fa-solid fa-filter me-1"></i> Lọc dữ liệu
+                    </button>
+                </form>
+            </div>
+            <div class="mt-2 text-muted small">
+                Khoảng thời gian thống kê: <strong>{{ t3_tu_ngay|date:"d/m/Y" }}</strong> đến <strong>{{ t3_den_ngay|date:"d/m/Y" }}</strong>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Sinh viên được thăm</th>
+                            <th>Lớp</th>
+                            <th>Khách đến thăm</th>
+                            <th>Số CMT Khách</th>
+                            <th>Ngày sinh</th>
+                            <th>Các lần đến thăm trong kỳ</th>
+                            <th class="text-center text-info">SỐ LẦN ĐẾN CHƠI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ds_khach_tham %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ row.sinh_vien.hoten }}</strong>
+                                <span class="badge bg-secondary font-monospace d-block" style="width: fit-content;">{{ row.sinh_vien.masv }}</span>
+                            </td>
+                            <td>{{ row.sinh_vien.lop|default:"-" }}</td>
+                            <td>
+                                <strong class="text-primary">{{ row.khach.hoten }}</strong>
+                                <small class="text-muted d-block">Mã: {{ row.khach.makhach }}</small>
+                            </td>
+                            <td class="font-monospace">{{ row.khach.socmt }}</td>
+                            <td>{{ row.khach.ngaysinh|date:"d/m/Y"|default:"-" }}</td>
+                            <td>
+                                <ul class="list-unstyled mb-0 small">
+                                    {% for tg in row.danh_sach_lan %}
+                                    <li><i class="fa-solid fa-clock text-muted me-1"></i>{{ tg|date:"d/m/Y H:i" }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-subtle-info fs-6 px-3 py-2 fw-bold">
+                                    {{ row.so_lan_den }} lần
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                                Không có lượt khách nào đến thăm sinh viên trong khoảng thời gian này.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if ds_khach_tham %}
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="7" class="text-end text-uppercase">Tổng số lượt khách đến thăm trong kỳ:</td>
+                            <td class="text-center text-info fs-6">{{ tong_luot_tham }} lượt</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: TRUY VẤN 4 - DOANH THU DỊCH VỤ THEO THÁNG -->
+    <!-- ======================================================== -->
+    {% if active_tab == 'truyvan4' %}
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-warning-emphasis mb-1">
+                        <i class="fa-solid fa-chart-pie me-2"></i>Truy vấn 4: Danh mục dịch vụ cùng doanh thu mỗi dịch vụ theo tháng
+                    </h5>
+                    <small class="text-muted">
+                        Doanh thu chi tiết từng hạng mục: Tiền thuê phòng, vé gửi xe tháng, lượt xe phát sinh và các dịch vụ khác
+                    </small>
+                </div>
+                <!-- Filter Form -->
+                <form method="GET" class="d-flex flex-wrap align-items-center gap-2 no-print">
+                    <input type="hidden" name="tab" value="truyvan4">
+                    <div class="input-group input-group-sm" style="width: 140px;">
+                        <span class="input-group-text">Tháng</span>
+                        <select name="t4_month" class="form-select">
+                            {% for m in month_choices %}
+                            <option value="{{ m }}" {% if t4_month == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 130px;">
+                        <span class="input-group-text">Năm</span>
+                        <input type="number" name="t4_year" class="form-control" value="{{ t4_year }}" min="2020" max="2030">
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-sm fw-semibold">
+                        <i class="fa-solid fa-filter me-1"></i> Xem doanh thu
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row align-items-center mb-4">
+                <div class="col-lg-7">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Mã DV</th>
+                                    <th>Tên dịch vụ</th>
+                                    <th>Phân loại</th>
+                                    <th class="text-center">Quy mô / Số lượt</th>
+                                    <th class="text-end">Doanh thu (VNĐ)</th>
+                                    <th class="text-end">Tỷ trọng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in bao_cao_doanh_thu.danh_sach %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="badge bg-secondary font-monospace">{{ row.ma }}</span></td>
+                                    <td><strong>{{ row.ten }}</strong></td>
+                                    <td><span class="badge bg-light text-dark">{{ row.loai }}</span></td>
+                                    <td class="text-center">{{ row.so_luot }} {{ row.don_vi }}</td>
+                                    <td class="text-end fw-bold">{{ row.doanh_thu|floatformat:0 }} đ</td>
+                                    <td class="text-end">
+                                        <span class="badge badge-subtle-primary">{{ row.ti_le }}%</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light fw-bold fs-6">
+                                    <td colspan="5" class="text-end text-uppercase">TỔNG DOANH THU THÁNG {{ t4_month }}/{{ t4_year }}:</td>
+                                    <td class="text-end text-danger">{{ bao_cao_doanh_thu.tong_doanh_thu|floatformat:0 }} đ</td>
+                                    <td class="text-end">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <h6 class="fw-bold mb-3">Biểu đồ tỷ lệ doanh thu</h6>
+                        <div style="max-height: 260px;">
+                            <canvas id="tab4Chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if active_tab == 'truyvan4' %}
+<script>
+    const ctxT4 = document.getElementById('tab4Chart')?.getContext('2d');
+    if (ctxT4) {
+        new Chart(ctxT4, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for r in bao_cao_doanh_thu.danh_sach %}'{{ r.ten }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for r in bao_cao_doanh_thu.danh_sach %}{{ r.doanh_thu }},{% endfor %}],
+                    backgroundColor: [
+                        '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

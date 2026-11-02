@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Nhật ký lượt gửi/lấy xe - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_xe' %}" class="text-decoration-none text-secondary">Gửi xe</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Nhật ký lượt gửi/lấy xe
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Nhật Ký Các Lượt Lấy/Gửi Xe Tháng</h5>
+                    <small class="text-muted">
+                        Quy tắc: 2 lượt lấy/gửi đầu trong ngày miễn phí. Từ lượt thứ 3 phát sinh <strong>3.000 đ/lượt</strong>
+                    </small>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'ghi_nhan_luot_gui' %}" class="btn btn-warning btn-sm fw-semibold">
+                        <i class="fa-solid fa-plus me-1"></i> Ghi nhận lượt xe ra/vào
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <form method="GET" class="row g-2 mt-2 pt-2 border-top align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Ngày</span>
+                        <input type="date" name="ngay" class="form-control" value="{{ ngay_loc }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Biển số</span>
+                        <input type="text" name="bienso" class="form-control text-uppercase" placeholder="VD: 29A-12345..." value="{{ bienso }}">
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fa-solid fa-filter me-1"></i> Lọc
+                    </button>
+                    {% if ngay_loc or bienso %}
+                    <a href="{% url 'danh_sach_luot_gui' %}" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã lượt</th>
+                            <th>Biển số xe</th>
+                            <th>Sinh viên</th>
+                            <th>Ngày ghi nhận</th>
+                            <th>Thời gian lấy xe (Ra)</th>
+                            <th>Thời gian gửi lại (Vào)</th>
+                            <th class="text-end">Tiền phát sinh</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for luot in ds_luot %}
+                        <tr>
+                            <td><span class="badge bg-light text-muted font-monospace">#{{ luot.maluot }}</span></td>
+                            <td>
+                                <strong class="text-primary font-monospace fs-6">{{ luot.xe_thang_id }}</strong>
+                            </td>
+                            <td>
+                                <strong>{{ luot.xe_thang.sinh_vien.hoten }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ luot.xe_thang.sinh_vien.masv }}</small>
+                            </td>
+                            <td>{{ luot.ngay|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if luot.thoigianlay %}
+                                    <i class="fa-solid fa-arrow-up-from-bracket text-danger me-1"></i>
+                                    {{ luot.thoigianlay|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if luot.thoigiangui %}
+                                    <i class="fa-solid fa-arrow-down-to-bracket text-success me-1"></i>
+                                    {{ luot.thoigiangui|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning">Đang ngoài bãi</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if luot.sotienphatsinh > 0 %}
+                                    <span class="badge badge-subtle-danger fs-6">+{{ luot.sotienphatsinh|floatformat:0 }} đ</span>
+                                    <small class="d-block text-danger">Lượt 3+ trong ngày</small>
+                                {% else %}
+                                    <span class="badge badge-subtle-success">0 đ (Miễn phí)</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if not luot.thoigiangui %}
+                                <a href="{% url 'check_out_xe' luot.maluot %}" class="btn btn-outline-success btn-sm" title="Ghi nhận xe gửi vào bãi">
+                                    <i class="fa-solid fa-check me-1"></i> Xe về bãi
+                                </a>
+                                {% else %}
+                                <span class="text-muted small"><i class="fa-solid fa-circle-check text-success"></i> Đã gửi lại</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-motorcycle fa-2x mb-2 d-block"></i>
+                                Chưa có nhật ký lượt gửi xe nào.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

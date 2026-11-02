@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Xóa lượt khách thăm - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_khach' %}" class="text-decoration-none text-secondary">Khách thăm</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Xóa
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px;">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Xác Nhận Xóa Lượt Khách Thăm
+            </h5>
+        </div>
+        <div class="card-body p-4 text-center">
+            <div class="mb-3">
+                <i class="fa-solid fa-user-xmark text-danger" style="font-size: 4rem;"></i>
+            </div>
+            <h5>Bạn có chắc chắn muốn xóa lượt khách thăm #{{ luot.maluottham }}?</h5>
+            
+            <div class="alert alert-light border my-3 text-start small">
+                <div><strong>Khách:</strong> {{ luot.khach.hoten }} (Mã: {{ luot.khach.makhach }})</div>
+                <div><strong>Sinh viên được thăm:</strong> {{ luot.sinh_vien.hoten }} ({{ luot.sinh_vien.masv }})</div>
+                <div><strong>Thời gian đến:</strong> {{ luot.thoigianden|date:"d/m/Y H:i" }}</div>
+            </div>
+
+            <form method="POST" class="d-flex justify-content-center gap-2">
+                {% csrf_token %}
+                <a href="{% url 'danh_sach_khach' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-danger fw-semibold px-4">
+                    <i class="fa-solid fa-trash me-1"></i> Xác nhận xóa
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

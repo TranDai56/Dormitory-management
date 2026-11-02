@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Hủy xe {{ xe.bienso }} - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_xe' %}" class="text-decoration-none text-secondary">Gửi xe</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Hủy xe: {{ xe.bienso }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px;">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Xác Nhận Hủy Xe Vé Tháng
+            </h5>
+        </div>
+        <div class="card-body p-4 text-center">
+            <div class="mb-3">
+                <i class="fa-solid fa-motorcycle text-danger" style="font-size: 4rem;"></i>
+            </div>
+            <h5>Bạn có chắc chắn muốn hủy đăng ký vé tháng cho xe sau?</h5>
+            
+            <div class="alert alert-light border my-3 text-start small">
+                <div><strong>Biển số:</strong> <span class="font-monospace text-primary fw-bold">{{ xe.bienso }}</span></div>
+                <div><strong>Sinh viên:</strong> {{ xe.sinh_vien.hoten }} ({{ xe.sinh_vien.masv }})</div>
+                <div><strong>Loại xe:</strong> {{ xe.loaixe }}</div>
+                <div><strong>Hạn dùng:</strong> {{ xe.ngayhethan|date:"d/m/Y" }}</div>
+            </div>
+
+            <form method="POST" class="d-flex justify-content-center gap-2">
+                {% csrf_token %}
+                <a href="{% url 'danh_sach_xe' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-danger fw-semibold px-4">
+                    <i class="fa-solid fa-trash me-1"></i> Xác nhận hủy xe
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

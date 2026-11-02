@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Ghi nhận lượt xe ra/vào - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_luot_gui' %}" class="text-decoration-none text-secondary">Lượt gửi xe</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Ghi nhận lượt mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 700px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-warning-emphasis">
+                <i class="fa-solid fa-motorcycle me-2"></i>Ghi Nhận Lượt Lấy/Gửi Xe Vé Tháng
+            </h5>
+            <small class="text-muted">Hệ thống sẽ tự động kiểm tra số lượt trong ngày của xe và áp dụng phí 3.000đ từ lượt 3 trở đi</small>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Chọn Biển Số Xe <span class="text-danger">*</span></label>
+                        <select name="bienso" class="form-select font-monospace" required>
+                            <option value="">-- Chọn biển số xe --</option>
+                            {% for xe in all_xe %}
+                            <option value="{{ xe.bienso }}">
+                                {{ xe.bienso }} - {{ xe.sinh_vien.hoten }} ({{ xe.sinh_vien.masv }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày ghi nhận <span class="text-danger">*</span></label>
+                        <input type="date" name="ngay" class="form-control" value="{{ today_str }}" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Thời gian lấy xe ra khỏi bãi <span class="text-danger">*</span></label>
+                        <input type="datetime-local" name="thoigianlay" class="form-control" value="{{ now_str }}" required>
+                        <small class="text-muted">Thời gian sinh viên dắt xe ra ngoài</small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border small mt-4 mb-0">
+                    <i class="fa-solid fa-circle-info me-2 text-primary"></i>
+                    <strong>Cách tính phí tự động:</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        <li>Lượt 1 và 2 trong cùng ngày: Miễn phí (0 đ).</li>
+                        <li>Từ lượt 3 trở đi trong cùng ngày: Thu thêm 3.000 đ/lượt phát sinh.</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_luot_gui' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-warning fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Ghi nhận lượt xe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

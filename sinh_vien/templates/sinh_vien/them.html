@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm sinh viên mới - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_sinh_vien' %}" class="text-decoration-none text-secondary">Sinh viên</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Thêm mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 800px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+                <i class="fa-solid fa-user-plus me-2"></i>Thêm Mới Sinh Viên
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số CMT / CCCD <span class="text-danger">*</span></label>
+                        <input type="text" name="socmt" class="form-control" required placeholder="Nhập số CMT/CCCD..." value="{{ post.socmt }}">
+                        <small class="text-muted">Định danh bảng NGUOI (Khóa chính)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mã sinh viên <span class="text-danger">*</span></label>
+                        <input type="text" name="masv" class="form-control" required placeholder="VD: SV005..." value="{{ post.masv }}">
+                        <small class="text-muted">Mã SV duy nhất</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" name="hoten" class="form-control" required placeholder="Họ và tên sinh viên..." value="{{ post.hoten }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày sinh</label>
+                        <input type="date" name="ngaysinh" class="form-control" value="{{ post.ngaysinh }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Lớp sinh hoạt</label>
+                        <input type="text" name="lop" class="form-control" placeholder="VD: CNTT1, QTKD2..." value="{{ post.lop }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Quê quán</label>
+                        <input type="text" name="quequan" class="form-control" placeholder="Tỉnh / Thành phố..." value="{{ post.quequan }}">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_sinh_vien' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Lưu sinh viên
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

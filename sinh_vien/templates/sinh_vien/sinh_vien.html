@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Danh sách sinh viên - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-user-graduate me-1 text-primary"></i> Quản lý sinh viên KTX
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Danh Sách Sinh Viên Ký Túc Xá</h5>
+                    <small class="text-muted">Tổng cộng <strong>{{ tong_so }}</strong> sinh viên trong hệ thống</small>
+                </div>
+                
+                <div class="d-flex flex-wrap gap-2">
+                    <form method="GET" class="d-flex" style="max-width: 320px;">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="q" class="form-control" placeholder="Tìm theo tên, mã SV, CMT, lớp..." value="{{ tu_khoa }}">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fa-solid fa-search"></i>
+                            </button>
+                            {% if tu_khoa %}
+                            <a href="{% url 'danh_sach_sinh_vien' %}" class="btn btn-outline-danger">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                    <a href="{% url 'them_sinh_vien' %}" class="btn btn-primary btn-sm fw-semibold">
+                        <i class="fa-solid fa-user-plus me-1"></i> Thêm sinh viên
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã SV</th>
+                            <th>Họ và tên</th>
+                            <th>Số CMT / CCCD</th>
+                            <th>Ngày sinh</th>
+                            <th>Lớp</th>
+                            <th>Quê quán</th>
+                            <th>Phòng đang ở</th>
+                            <th>Xe tháng</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sv in ds_sinh_vien %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <a href="{% url 'chi_tiet_sinh_vien' sv.masv %}" class="badge bg-primary text-decoration-none font-monospace fs-6">
+                                    {{ sv.masv }}
+                                </a>
+                            </td>
+                            <td>
+                                <strong class="text-dark">{{ sv.hoten }}</strong>
+                            </td>
+                            <td class="font-monospace text-muted">{{ sv.socmt }}</td>
+                            <td>{{ sv.ngaysinh|date:"d/m/Y"|default:"-" }}</td>
+                            <td>{{ sv.lop|default:"-" }}</td>
+                            <td>{{ sv.quequan|default:"-" }}</td>
+                            <td>
+                                {% with phong=sv.phong_hien_tai %}
+                                    {% if phong %}
+                                        <a href="{% url 'chi_tiet_phong' phong.sophong %}" class="badge badge-subtle-success text-decoration-none">
+                                            Phòng {{ phong.sophong }}
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted">Chưa xếp phòng</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% with so_xe=sv.so_xe_hieu_luc %}
+                                    {% if so_xe > 0 %}
+                                        <span class="badge badge-subtle-primary">{{ so_xe }} xe</span>
+                                    {% else %}
+                                        <span class="text-muted small">Không</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'chi_tiet_sinh_vien' sv.masv %}" class="btn btn-outline-secondary" title="Xem chi tiết">
+                                        <i class="fa-solid fa-eye text-info"></i>
+                                    </a>
+                                    <a href="{% url 'sua_sinh_vien' sv.masv %}" class="btn btn-outline-secondary" title="Sửa">
+                                        <i class="fa-solid fa-pen-to-square text-warning"></i>
+                                    </a>
+                                    <a href="{% url 'xoa_sinh_vien' sv.masv %}" class="btn btn-outline-secondary" title="Xóa">
+                                        <i class="fa-solid fa-trash text-danger"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-user-slash fa-2x mb-2 d-block"></i>
+                                Không tìm thấy sinh viên nào phù hợp.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

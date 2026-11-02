@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Sử dụng dịch vụ - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-hand-holding-dollar me-1 text-primary"></i> Nhật ký sử dụng dịch vụ KTX
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Nhật Ký Sử Dụng Dịch Vụ</h5>
+                    <small class="text-muted">Ghi nhận các lần sinh viên sử dụng dịch vụ để cộng dồn vào hóa đơn cuối tháng</small>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'them_su_dung_dich_vu' %}" class="btn btn-primary btn-sm fw-semibold">
+                        <i class="fa-solid fa-plus me-1"></i> Ghi nhận dùng dịch vụ
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <form method="GET" class="row g-2 mt-2 pt-2 border-top align-items-center">
+                <div class="col-md-4">
+                    <select name="masv" class="form-select form-select-sm">
+                        <option value="">-- Lọc theo tất cả sinh viên --</option>
+                        {% for sv in all_sv %}
+                        <option value="{{ sv.masv }}" {% if selected_masv == sv.masv %}selected{% endif %}>
+                            {{ sv.masv }} - {{ sv.hoten }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select name="madv" class="form-select form-select-sm">
+                        <option value="">-- Lọc theo tất cả dịch vụ --</option>
+                        {% for dv in all_dv %}
+                        <option value="{{ dv.madichvu }}" {% if selected_madv == dv.madichvu %}selected{% endif %}>
+                            {{ dv.tendichvu }} ({{ dv.dongia|floatformat:0 }}đ)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fa-solid fa-filter me-1"></i> Lọc
+                    </button>
+                    {% if selected_masv or selected_madv %}
+                    <a href="{% url 'danh_sach_chi_phi' %}" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mã lần</th>
+                            <th>Sinh viên</th>
+                            <th>Dịch vụ</th>
+                            <th>Thời gian sử dụng</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-end">Đơn giá</th>
+                            <th class="text-end">Thành tiền</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ds_chi_phi %}
+                        <tr>
+                            <td><span class="badge bg-light text-muted font-monospace">#{{ row.malansudung }}</span></td>
+                            <td>
+                                <strong>{{ row.sinh_vien.hoten }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ row.sinh_vien.masv }}</small>
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ row.dich_vu.tendichvu }}</strong>
+                                <small class="text-muted d-block">Mã: {{ row.dich_vu.madichvu }}</small>
+                            </td>
+                            <td>{{ row.thoigiansudung|date:"d/m/Y H:i" }}</td>
+                            <td class="text-center"><span class="badge bg-light text-dark fs-6">{{ row.soluong }}</span></td>
+                            <td class="text-end">{{ row.dich_vu.dongia|floatformat:0 }} đ</td>
+                            <td class="text-end fw-bold text-success">{{ row.thanh_tien|floatformat:0 }} đ</td>
+                            <td class="text-center">
+                                <a href="{% url 'xoa_su_dung_dich_vu' row.malansudung %}" class="btn btn-outline-danger btn-sm" title="Xóa bản ghi">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="fa-solid fa-receipt fa-2x mb-2 d-block"></i>
+                                Chưa có nhật ký sử dụng dịch vụ nào.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý xe vé tháng - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <i class="fa-solid fa-motorcycle me-1 text-primary"></i> Quản lý xe vé tháng KTX
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-primary">Danh Sách Xe Gửi Vé Tháng</h5>
+                    <small class="text-muted">Quy định: Mỗi sinh viên chỉ được đăng ký tối đa 2 xe vé tháng còn hiệu lực (Đơn giá: 100.000 đ/tháng)</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'danh_sach_luot_gui' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-list-check me-1"></i> Nhật ký lượt gửi xe
+                    </a>
+                    <a href="{% url 'dang_ky_xe' %}" class="btn btn-primary btn-sm fw-semibold">
+                        <i class="fa-solid fa-plus me-1"></i> Đăng ký xe mới
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-custom table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Biển số xe</th>
+                            <th>Sinh viên sở hữu</th>
+                            <th>Lớp</th>
+                            <th>Loại phương tiện</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Ngày hết hạn</th>
+                            <th class="text-end">Đơn giá tháng</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for xe in ds_xe %}
+                        <tr>
+                            <td>
+                                <strong class="text-primary font-monospace fs-6">{{ xe.bienso }}</strong>
+                            </td>
+                            <td>
+                                <strong>{{ xe.sinh_vien.hoten }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ xe.sinh_vien.masv }}</small>
+                            </td>
+                            <td>{{ xe.sinh_vien.lop|default:"-" }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fa-solid fa-motorcycle me-1 text-muted"></i>{{ xe.loaixe|default:"Xe máy" }}
+                                </span>
+                            </td>
+                            <td>{{ xe.ngaydangky|date:"d/m/Y" }}</td>
+                            <td>{{ xe.ngayhethan|date:"d/m/Y" }}</td>
+                            <td class="text-end fw-semibold">{{ xe.dongiathang|floatformat:0 }} đ</td>
+                            <td class="text-center">
+                                {% if xe.con_hieu_luc %}
+                                    <span class="badge badge-subtle-success">Còn hiệu lực</span>
+                                {% else %}
+                                    <span class="badge badge-subtle-danger">Đã hết hạn</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'sua_xe' xe.bienso %}" class="btn btn-outline-secondary" title="Sửa / Gia hạn">
+                                        <i class="fa-solid fa-pen-to-square text-warning"></i>
+                                    </a>
+                                    <a href="{% url 'xoa_xe' xe.bienso %}" class="btn btn-outline-secondary" title="Hủy xe">
+                                        <i class="fa-solid fa-trash text-danger"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">Chưa có xe vé tháng nào được đăng ký.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ sơ sinh viên: {{ sv.hoten }} - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_sinh_vien' %}" class="text-decoration-none text-secondary">Sinh viên</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> {{ sv.hoten }} ({{ sv.masv }})
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Top Action Row -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">{{ sv.hoten }}</h4>
+            <span class="badge bg-secondary font-monospace">{{ sv.masv }}</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'in_hoa_don' sv.masv %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                <i class="fa-solid fa-print me-1"></i> In hóa đơn tháng
+            </a>
+            <a href="{% url 'sua_sinh_vien' sv.masv %}" class="btn btn-outline-warning btn-sm">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Sửa thông tin
+            </a>
+            <a href="{% url 'xoa_sinh_vien' sv.masv %}" class="btn btn-outline-danger btn-sm">
+                <i class="fa-solid fa-trash me-1"></i> Xóa
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile Column -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-address-card me-2 text-primary"></i>Thông tin cá nhân
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-sm mb-0">
+                        <tr>
+                            <td class="text-muted" style="width: 40%;">Mã sinh viên:</td>
+                            <td class="fw-bold font-monospace text-primary">{{ sv.masv }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Số CMT/CCCD:</td>
+                            <td class="font-monospace">{{ sv.socmt }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Ngày sinh:</td>
+                            <td>{{ sv.ngaysinh|date:"d/m/Y"|default:"Chưa rõ" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Lớp:</td>
+                            <td><span class="badge bg-light text-dark">{{ sv.lop|default:"-" }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Quê quán:</td>
+                            <td>{{ sv.quequan|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Current Room -->
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-bed me-2 text-success"></i>Phòng ở hiện tại
+                    </h6>
+                    <a href="{% url 'xep_phong' %}" class="btn btn-link btn-sm p-0 text-decoration-none">Đổi phòng</a>
+                </div>
+                <div class="card-body">
+                    {% if phong_hien_tai %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold text-success mb-0">Phòng {{ phong_hien_tai.sophong }}</h5>
+                            <span class="badge badge-subtle-success">Đang ở</span>
+                        </div>
+                        <p class="small text-muted mb-2">Loại: {{ phong_hien_tai.loaiphong }} | Đơn giá: {{ phong_hien_tai.dongia|floatformat:0 }} đ/tháng</p>
+                        <a href="{% url 'chi_tiet_phong' phong_hien_tai.sophong %}" class="btn btn-outline-success btn-sm w-100">
+                            Xem chi tiết phòng & bạn cùng phòng
+                        </a>
+                    {% else %}
+                        <p class="text-muted small mb-3">Sinh viên chưa được xếp phòng ở.</p>
+                        <a href="{% url 'xep_phong' %}" class="btn btn-primary btn-sm w-100">
+                            <i class="fa-solid fa-bed me-1"></i> Xếp phòng ngay
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Vehicles Registered -->
+            <div class="card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-motorcycle me-2 text-warning"></i>Xe vé tháng ({{ ds_xe|length }}/2)
+                    </h6>
+                    {% if ds_xe|length < 2 %}
+                    <a href="{% url 'dang_ky_xe' %}" class="btn btn-link btn-sm p-0 text-decoration-none">+ Đăng ký</a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for xe in ds_xe %}
+                        <div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="font-monospace text-primary">{{ xe.bienso }}</strong>
+                                {% if xe.con_hieu_luc %}
+                                    <span class="badge badge-subtle-success">Còn hiệu lực</span>
+                                {% else %}
+                                    <span class="badge badge-subtle-danger">Hết hạn</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted d-block">{{ xe.loaixe }} - Đơn giá: {{ xe.dongiathang|floatformat:0 }} đ/tháng</small>
+                            <small class="text-muted d-block">Hạn dùng: {{ xe.ngayhethan|date:"d/m/Y" }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-center text-muted small">Chưa đăng ký xe vé tháng nào.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Column -->
+        <div class="col-lg-8">
+            <!-- Room History -->
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Lịch sử đăng ký ở phòng
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Phòng</th>
+                                <th>Loại phòng</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dk in lich_su_phong %}
+                            <tr>
+                                <td><strong>Phòng {{ dk.phong.sophong }}</strong></td>
+                                <td>{{ dk.phong.loaiphong }}</td>
+                                <td>{{ dk.ngaybatdau|date:"d/m/Y" }}</td>
+                                <td>{{ dk.ngayketthuc|date:"d/m/Y"|default:"Hiện tại" }}</td>
+                                <td>
+                                    {% if dk.con_hieu_luc %}
+                                        <span class="badge badge-subtle-success">Đang ở</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted">Đã trả phòng</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-3 text-muted">Chưa có lịch sử ở phòng.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Service Usage History -->
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-receipt me-2 text-success"></i>Dịch vụ đã sử dụng
+                    </h6>
+                    <a href="{% url 'them_su_dung_dich_vu' %}" class="btn btn-sm btn-outline-success">
+                        <i class="fa-solid fa-plus me-1"></i> Ghi nhận dùng dịch vụ
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Dịch vụ</th>
+                                <th>Thời gian</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sd in ds_su_dung %}
+                            <tr>
+                                <td><strong>{{ sd.dich_vu.tendichvu }}</strong></td>
+                                <td>{{ sd.thoigiansudung|date:"d/m/Y H:i" }}</td>
+                                <td class="text-center">{{ sd.soluong }}</td>
+                                <td class="text-end">{{ sd.dich_vu.dongia|floatformat:0 }} đ</td>
+                                <td class="text-end fw-semibold text-primary">{{ sd.thanh_tien|floatformat:0 }} đ</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-3 text-muted">Chưa có bản ghi dịch vụ nào.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Visitors History -->
+            <div class="card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-semibold">
+                        <i class="fa-solid fa-id-card-clip me-2 text-info"></i>Khách đến thăm sinh viên
+                    </h6>
+                    <a href="{% url 'ghi_nhan_luot_tham' %}" class="btn btn-sm btn-outline-info">
+                        <i class="fa-solid fa-plus me-1"></i> Ghi nhận khách thăm
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Khách đến thăm</th>
+                                <th>Số CMT Khách</th>
+                                <th>Thời gian đến</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lt in ds_khach %}
+                            <tr>
+                                <td><strong>{{ lt.khach.hoten }}</strong></td>
+                                <td class="font-monospace text-muted">{{ lt.khach.socmt }}</td>
+                                <td>{{ lt.thoigianden|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-3 text-muted">Chưa có khách nào đến thăm.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

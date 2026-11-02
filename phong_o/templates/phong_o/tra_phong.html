@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Trả phòng - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Trả phòng
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px;">
+    <div class="card shadow-sm border-warning">
+        <div class="card-header bg-warning text-dark py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Xác Nhận Thủ Tục Trả Phòng
+            </h5>
+        </div>
+        <div class="card-body p-4 text-center">
+            <div class="mb-3">
+                <i class="fa-solid fa-person-walking-luggage text-warning" style="font-size: 4rem;"></i>
+            </div>
+            <h5>Xác nhận hoàn tất thủ tục trả phòng cho sinh viên?</h5>
+            
+            <div class="alert alert-light border my-3 text-start small">
+                <div><strong>Sinh viên:</strong> <span class="fw-bold">{{ dk.sinh_vien.hoten }}</span> ({{ dk.sinh_vien.masv }})</div>
+                <div><strong>Phòng trả:</strong> <span class="badge bg-primary">Phòng {{ dk.phong.sophong }}</span></div>
+                <div><strong>Ngày bắt đầu ở:</strong> {{ dk.ngaybatdau|date:"d/m/Y" }}</div>
+                <div><strong>Ngày trả phòng:</strong> Hôm nay ({% now "d/m/Y" %})</div>
+            </div>
+
+            <p class="text-muted small mb-4">
+                Sau khi xác nhận, chỗ ở trong phòng sẽ được giải phóng để xếp sinh viên khác.
+            </p>
+
+            <form method="POST" class="d-flex justify-content-center gap-2">
+                {% csrf_token %}
+                <a href="{% url 'chi_tiet_phong' dk.phong.sophong %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-warning fw-semibold px-4">
+                    <i class="fa-solid fa-check me-1"></i> Xác nhận trả phòng
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

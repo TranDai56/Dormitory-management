@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Xóa Phòng {{ phong.sophong }} - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_phong' %}" class="text-decoration-none text-secondary">Phòng ở</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Xóa Phòng {{ phong.sophong }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 600px;">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Xác Nhận Xóa Phòng Ở
+            </h5>
+        </div>
+        <div class="card-body p-4 text-center">
+            <div class="mb-3">
+                <i class="fa-solid fa-door-closed text-danger" style="font-size: 4rem;"></i>
+            </div>
+            <h5>Bạn có chắc chắn muốn xóa phòng sau?</h5>
+            <div class="alert alert-light border my-3 text-start small">
+                <div><strong>Số phòng:</strong> <span class="text-primary font-monospace fs-6">Phòng {{ phong.sophong }}</span></div>
+                <div><strong>Loại phòng:</strong> {{ phong.loaiphong }}</div>
+                <div><strong>Đơn giá:</strong> {{ phong.dongia|floatformat:0 }} đ / tháng</div>
+                <div><strong>Sức chứa:</strong> {{ phong.songuoitoida }} người</div>
+            </div>
+
+            <form method="POST" class="d-flex justify-content-center gap-2">
+                {% csrf_token %}
+                <a href="{% url 'chi_tiet_phong' phong.sophong %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-danger fw-semibold px-4">
+                    <i class="fa-solid fa-trash me-1"></i> Xác nhận xóa
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

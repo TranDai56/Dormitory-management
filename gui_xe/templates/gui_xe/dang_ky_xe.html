@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Đăng ký xe vé tháng - Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_xe' %}" class="text-decoration-none text-secondary">Gửi xe</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Đăng ký xe mới
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 750px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-primary">
+                <i class="fa-solid fa-motorcycle me-2"></i>Đăng Ký Xe Vé Tháng Cho Sinh Viên
+            </h5>
+            <small class="text-muted">Kiểm tra ràng buộc: Mỗi sinh viên chỉ được đăng ký tối đa 2 xe vé tháng còn hiệu lực</small>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Chọn Sinh Viên <span class="text-danger">*</span></label>
+                        <select name="masv" class="form-select" required>
+                            <option value="">-- Chọn sinh viên --</option>
+                            {% for sv in all_sv %}
+                            <option value="{{ sv.masv }}" {% if post.masv == sv.masv %}selected{% endif %}>
+                                {{ sv.masv }} - {{ sv.hoten }} (Hiện có: {{ sv.so_xe_hieu_luc }}/2 xe)
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Hệ thống sẽ từ chối nếu SV đã có 2 xe còn hạn</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Biển số xe <span class="text-danger">*</span></label>
+                        <input type="text" name="bienso" class="form-control font-monospace text-uppercase" required placeholder="VD: 29A-12345, 15B-67890..." value="{{ post.bienso }}">
+                        <small class="text-muted">Khóa chính của bảng XE_THANG</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Loại phương tiện</label>
+                        <input type="text" name="loaixe" class="form-control" placeholder="VD: Xe máy, Xe đạp điện, Xe đạp..." value="{{ post.loaixe|default:'Xe may' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đơn giá vé tháng (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="dongiathang" class="form-control" required value="{{ post.dongiathang|default:100000 }}" min="0" step="10000">
+                        <small class="text-muted">Mặc định: 100.000 đ/tháng</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày bắt đầu đăng ký <span class="text-danger">*</span></label>
+                        <input type="date" name="ngaydangky" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày hết hạn vé tháng <span class="text-danger">*</span></label>
+                        <input type="date" name="ngayhethan" class="form-control" value="{{ default_end|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning border small mt-4 mb-0">
+                    <i class="fa-solid fa-triangle-exclamation me-2 text-warning"></i>
+                    <strong>Quy định sử dụng:</strong> Xe vé tháng được ra/vào bãi 2 lần miễn phí mỗi ngày. Từ lần thứ 3 trở đi phát sinh phí 3.000 đ/lượt.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'danh_sach_xe' %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Đăng ký xe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

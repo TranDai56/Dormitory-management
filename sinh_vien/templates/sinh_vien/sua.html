@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Sửa sinh viên {{ sv.masv }} - Quản lý Ký Túc Xá{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{% url 'danh_sach_sinh_vien' %}" class="text-decoration-none text-secondary">Sinh viên</a>
+    <i class="fa-solid fa-chevron-right mx-1 small text-muted"></i> Sửa: {{ sv.masv }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0" style="max-width: 800px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-warning-emphasis">
+                <i class="fa-solid fa-user-pen me-2"></i>Chỉnh Sửa Thông Tin Sinh Viên
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số CMT / CCCD</label>
+                        <input type="text" class="form-control bg-light font-monospace" value="{{ sv.socmt }}" readonly disabled>
+                        <small class="text-muted">Khóa chính (Không thể thay đổi)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mã sinh viên</label>
+                        <input type="text" class="form-control bg-light font-monospace" value="{{ sv.masv }}" readonly disabled>
+                        <small class="text-muted">Mã sinh viên định danh</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" name="hoten" class="form-control" required value="{{ sv.hoten }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày sinh</label>
+                        <input type="date" name="ngaysinh" class="form-control" value="{{ sv.ngaysinh|date:'Y-m-d' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Lớp sinh hoạt</label>
+                        <input type="text" name="lop" class="form-control" value="{{ sv.lop|default:'' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Quê quán</label>
+                        <input type="text" name="quequan" class="form-control" value="{{ sv.quequan|default:'' }}">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{% url 'chi_tiet_sinh_vien' sv.masv %}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-warning fw-semibold">
+                        <i class="fa-solid fa-save me-1"></i> Cập nhật thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
