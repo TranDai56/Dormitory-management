@@ -1,0 +1,195 @@
+DROP DATABASE IF EXISTS QL_KTX;
+CREATE DATABASE QL_KTX 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+USE QL_KTX;
+
+
+-- 1. Bảng NGUOI (Thực thể cha chuyên biệt hóa ISA)
+CREATE TABLE NGUOI (
+    SoCMT VARCHAR(20) PRIMARY KEY,
+    HoTen VARCHAR(250) NOT NULL,
+    NgaySinh DATE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Bảng KHACH_THAM (Thực thể con của NGUOI)
+CREATE TABLE KHACH_THAM (
+    SoCMT VARCHAR(20) PRIMARY KEY,
+    MaKhach VARCHAR(250) NOT NULL UNIQUE,
+    CONSTRAINT fk_khach_nguoi FOREIGN KEY (SoCMT) REFERENCES NGUOI(SoCMT) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Bảng SINH_VIEN (Thực thể con của NGUOI)
+CREATE TABLE SINH_VIEN (
+    SoCMT VARCHAR(20) PRIMARY KEY,
+    MaSV VARCHAR(100) NOT NULL UNIQUE,
+    Lop VARCHAR(100),
+    QueQuan VARCHAR(100),
+    CONSTRAINT fk_sinhvien_nguoi FOREIGN KEY (SoCMT) REFERENCES NGUOI(SoCMT) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Bảng PHONG (Phòng ở trong ký túc xá)
+CREATE TABLE PHONG (
+    SoPhong VARCHAR(20) PRIMARY KEY,
+    loaiPhong VARCHAR(200),
+    DonGia BIGINT NOT NULL,
+    SoNguoiToiDa INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Bảng DICH_VU (Danh mục dịch vụ KTX)
+CREATE TABLE DICH_VU (
+    MaDichVu VARCHAR(20) PRIMARY KEY,
+    TenDichVu VARCHAR(200),
+    DonGia BIGINT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Bảng DANG_KY_O (Mối quan hệ CHUA giữa Sinh Viên và Phòng ở)
+CREATE TABLE DANG_KY_O (
+    MaDangKyO INT AUTO_INCREMENT PRIMARY KEY,
+    SoCMT_SV VARCHAR(20) NOT NULL,
+    SoPhong VARCHAR(20) NOT NULL,
+    NgayBatDau DATE NOT NULL,
+    NgayKetThuc DATE,
+    CONSTRAINT fk_dangkyo_sinhvien FOREIGN KEY (SoCMT_SV) REFERENCES SINH_VIEN(SoCMT) ON DELETE CASCADE,
+    CONSTRAINT fk_dangkyo_phong FOREIGN KEY (SoPhong) REFERENCES PHONG(SoPhong) ON DELETE CASCADE,
+    CHECK (NgayKetThuc IS NULL OR NgayKetThuc >= NgayBatDau)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Bảng LUOT_THAM (Mối quan hệ THAM giữa Khách và Sinh Viên)
+CREATE TABLE LUOT_THAM (
+    MaLuotTham BIGINT AUTO_INCREMENT PRIMARY KEY,
+    SoCMT_Khach VARCHAR(20) NOT NULL,
+    SoCMT_SV VARCHAR(20) NOT NULL,
+    ThoiGianDen DATETIME,
+    CONSTRAINT fk_luottham_khach FOREIGN KEY (SoCMT_Khach) REFERENCES KHACH_THAM(SoCMT) ON DELETE CASCADE,
+    CONSTRAINT fk_luottham_sinhvien FOREIGN KEY (SoCMT_SV) REFERENCES SINH_VIEN(SoCMT) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Bảng XE_THANG (Xe gửi vé tháng của Sinh Viên)
+CREATE TABLE XE_THANG (
+    BienSo VARCHAR(50) PRIMARY KEY,
+    SoCMT_SV VARCHAR(20) NOT NULL,
+    LoaiXe VARCHAR(50),
+    NgayDangKy DATE NOT NULL,
+    NgayHetHan DATE NOT NULL,
+    DonGiaThang BIGINT NOT NULL DEFAULT 100000,
+    CONSTRAINT fk_xethang_sinhvien FOREIGN KEY (SoCMT_SV) REFERENCES SINH_VIEN(SoCMT) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. Bảng SU_DUNG_DICH_VU (Mối quan hệ SU_DUNG giữa Sinh Viên và Dịch Vụ)
+CREATE TABLE SU_DUNG_DICH_VU (
+    MaLanSuDung BIGINT AUTO_INCREMENT PRIMARY KEY,
+    SoCMT_SV VARCHAR(20) NOT NULL,
+    MaDichVu VARCHAR(20) NOT NULL,
+    ThoiGianSuDung DATETIME NOT NULL,
+    SoLuong BIGINT NOT NULL,
+    CONSTRAINT fk_sudung_sinhvien FOREIGN KEY (SoCMT_SV) REFERENCES SINH_VIEN(SoCMT) ON DELETE CASCADE,
+    CONSTRAINT fk_sudung_dichvu FOREIGN KEY (MaDichVu) REFERENCES DICH_VU(MaDichVu) ON DELETE CASCADE,
+    CHECK (SoLuong > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Bảng LUOT_GUI_XE (Thực thể yếu - Các lượt gửi/lấy xe của xe vé tháng)
+CREATE TABLE LUOT_GUI_XE (
+    MaLuot BIGINT AUTO_INCREMENT PRIMARY KEY,
+    BienSo VARCHAR(50) NOT NULL,
+    ThoiGianLay DATETIME,
+    ThoiGianGui DATETIME,
+    SoTienPhatSinh BIGINT NOT NULL DEFAULT 0,
+    Ngay DATE,
+    CONSTRAINT fk_luotgui_xethang FOREIGN KEY (BienSo) REFERENCES XE_THANG(BienSo) ON DELETE CASCADE,
+    CHECK (ThoiGianGui IS NULL OR ThoiGianLay IS NULL OR ThoiGianGui >= ThoiGianLay)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 1. Chèn người
+INSERT INTO NGUOI (SoCMT, HoTen, NgaySinh) VALUES
+('001000000001', 'Nguyen Van An', '2004-03-12'),
+('001000000002', 'Tran Thi Binh', '2004-07-21'),
+('001000000003', 'Le Van Cuong', '2003-11-05'),
+('001000000004', 'Pham Thi Dung', '2004-01-18'),
+('001000000005', 'Vu Hoang Giang', '2003-09-30'),
+('001000000101', 'Hoang Van Nam', '1985-06-10'),
+('001000000102', 'Do Thi Hoa', '1987-09-15'),
+('001000000103', 'Bui Van Minh', '1990-02-20'),
+('001000000104', 'Le Thi Mai', '1992-05-14');
+
+-- 2. Chèn sinh viên
+INSERT INTO SINH_VIEN (SoCMT, MaSV, Lop, QueQuan) VALUES
+('001000000001', 'SV001', 'CNTT1', 'Ha Noi'),
+('001000000002', 'SV002', 'CNTT1', 'Hai Phong'),
+('001000000003', 'SV003', 'CNTT2', 'Nam Dinh'),
+('001000000004', 'SV004', 'QTKD1', 'Bac Ninh'),
+('001000000005', 'SV005', 'DTVT1', 'Thai Binh');
+
+-- 3. Chèn khách thăm
+INSERT INTO KHACH_THAM (SoCMT, MaKhach) VALUES
+('001000000101', 'K001'),
+('001000000102', 'K002'),
+('001000000103', 'K003'),
+('001000000104', 'K004');
+
+-- 4. Chèn phòng ở
+INSERT INTO PHONG (SoPhong, loaiPhong, DonGia, SoNguoiToiDa) VALUES
+('101', 'Phong 2 nguoi', 1500000, 2),
+('102', 'Phong 2 nguoi', 1500000, 2),
+('201', 'Phong 4 nguoi', 1200000, 4),
+('202', 'Phong 4 nguoi', 1200000, 4),
+('301', 'Phong 6 nguoi Vip', 1000000, 6);
+
+-- 5. Chèn đăng ký ở phòng (CHÚ Ý RÀNG BUỘC SỨC CHỨA)
+INSERT INTO DANG_KY_O (SoCMT_SV, SoPhong, NgayBatDau, NgayKetThuc) VALUES
+('001000000001', '101', '2026-01-01', NULL),
+('001000000002', '101', '2026-01-01', NULL),
+('001000000003', '102', '2026-02-01', NULL),
+('001000000004', '201', '2026-01-15', NULL),
+('001000000005', '201', '2026-03-01', NULL);
+
+-- 6. Chèn danh mục dịch vụ
+INSERT INTO DICH_VU (MaDichVu, TenDichVu, DonGia) VALUES
+('DV01', 'Giat ui', 20000),
+('DV02', 'Nuoc uong', 10000),
+('DV03', 'Ve sinh', 30000),
+('DV04', 'Cho thue xe dap', 15000),
+('DV05', 'Suat com thang', 600000);
+
+-- 7. Chèn sử dụng dịch vụ
+INSERT INTO SU_DUNG_DICH_VU (SoCMT_SV, MaDichVu, ThoiGianSuDung, SoLuong) VALUES
+('001000000001', 'DV01', '2026-02-05 09:00:00', 2),
+('001000000001', 'DV02', '2026-02-10 10:00:00', 3),
+('001000000001', 'DV01', '2026-03-02 08:30:00', 1),
+('001000000002', 'DV02', '2026-02-12 14:00:00', 5),
+('001000000002', 'DV03', '2026-03-04 09:00:00', 1),
+('001000000003', 'DV01', '2026-03-05 15:00:00', 3),
+('001000000004', 'DV03', '2026-02-20 11:00:00', 2),
+('001000000005', 'DV04', '2026-03-10 08:00:00', 2);
+
+-- 8. Chèn xe vé tháng (Tối đa 2 xe / SV)
+INSERT INTO XE_THANG (BienSo, SoCMT_SV, LoaiXe, NgayDangKy, NgayHetHan, DonGiaThang) VALUES
+('29A-12345', '001000000001', 'Xe may', '2026-01-01', '2026-12-31', 100000),
+('29B-23456', '001000000001', 'Xe dap dien', '2026-02-01', '2026-12-31', 80000),
+('15A-34567', '001000000002', 'Xe may', '2026-01-15', '2026-12-31', 100000),
+('18B-45678', '001000000003', 'Xe dap dien', '2026-03-01', '2026-12-31', 80000),
+('99A-56789', '001000000004', 'Xe may', '2026-02-15', '2026-12-31', 100000);
+
+-- 9. Chèn lượt gửi xe (Lượt 1, 2 miễn phí, lượt 3 trong ngày phát sinh 3000đ)
+INSERT INTO LUOT_GUI_XE (BienSo, ThoiGianLay, ThoiGianGui, SoTienPhatSinh, Ngay) VALUES
+-- Ngày 2026-03-02, xe 29A-12345 có 3 lượt -> lượt 3 tính 3.000đ
+('29A-12345', '2026-03-02 07:30:00', '2026-03-02 17:00:00', 0, '2026-03-02'),
+('29A-12345', '2026-03-02 17:30:00', '2026-03-02 20:00:00', 0, '2026-03-02'),
+('29A-12345', '2026-03-02 20:30:00', '2026-03-02 22:00:00', 3000, '2026-03-02'),
+-- Các ngày khác
+('29B-23456', '2026-03-03 08:00:00', '2026-03-03 18:00:00', 0, '2026-03-03'),
+('15A-34567', '2026-03-04 07:45:00', '2026-03-04 17:15:00', 0, '2026-03-04'),
+('18B-45678', '2026-03-05 08:00:00', NULL, 0, '2026-03-05');
+
+-- 10. Chèn lượt thăm sinh viên
+INSERT INTO LUOT_THAM (SoCMT_Khach, SoCMT_SV, ThoiGianDen) VALUES
+('001000000101', '001000000001', '2026-03-02 10:00:00'),
+('001000000101', '001000000001', '2026-03-04 14:30:00'),
+('001000000102', '001000000001', '2026-03-05 16:00:00'),
+('001000000101', '001000000002', '2026-03-06 09:00:00'),
+('001000000103', '001000000003', '2026-03-07 13:00:00'),
+('001000000102', '001000000003', '2026-02-15 15:00:00'),
+('001000000103', '001000000004', '2026-02-18 10:30:00'),
+('001000000104', '001000000005', '2026-03-12 11:00:00');
+
